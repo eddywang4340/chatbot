@@ -2,12 +2,12 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
-openai_models = {
-    0 : "GPT-4o",
-    1 : "GPT-40 mini",
-    2 : "o1-preview and o1-mini",
-    3 : "GPT-3.5 Turbo"
-}
+openai_models = [
+    "GPT-4o",
+    "GPT-40 mini",
+    "o1-preview and o1-mini",
+    "GPT-3.5 Turbo"
+]
 
 # Show title and description.
 st.title("💬 Chatbot")
@@ -18,7 +18,7 @@ st.write(
 )
 
 df = pd.DataFrame({
-    'first column': [1, 2, 3, 4],
+    'first column': openai_models,
     'second column': [10, 20, 30, 40]
     })
 
