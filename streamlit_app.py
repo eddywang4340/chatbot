@@ -1,5 +1,13 @@
 import streamlit as st
 from openai import OpenAI
+import pandas as pd
+
+openai_models = {
+    0 : "GPT-4o",
+    1 : "GPT-40 mini",
+    2 : "o1-preview and o1-mini",
+    3 : "GPT-3.5 Turbo"
+}
 
 # Show title and description.
 st.title("💬 Chatbot")
@@ -8,6 +16,15 @@ st.write(
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
     "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
 )
+
+df = pd.DataFrame({
+    'first column': [1, 2, 3, 4],
+    'second column': [10, 20, 30, 40]
+    })
+
+option = st.selectbox(
+    'Which number do you like best?',
+     df['first column'])
 
 # Ask user for their OpenAI API key via `st.text_input`.
 # Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
