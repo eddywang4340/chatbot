@@ -2,33 +2,65 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
-openai_models = [
+openai_models = (
     "GPT-4o",
     "GPT-40 mini",
     "o1-preview and o1-mini",
     "GPT-3.5 Turbo"
-]
+)
+
+nymble_health_versions = (
+    "v1.0.1",
+    "v1.0.2",
+    "v1.0.3",
+    "v2.0.1",
+    "v2.1.0",
+    "v2.1.1"
+)
 
 # Show title and description.
-st.title("💬 Chatbot")
+st.title("💬 Nymble Health's Chatbot")
 st.write(
     "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
     "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
 )
 
-df = pd.DataFrame({
-    'first column': openai_models,
-    'second column': [10, 20, 30, 40]
-    })
+# df = pd.DataFrame({
+#     'first column': openai_models,
+#     'second column': [10, 20, 30, 40]
+#     })
 
-option = st.selectbox(
-    'Which number do you like best?',
-     df['first column'])
+# splits display screen into two columns
+# left_column, right_column = st.columns(2)
+
+# Add a selectbox to the sidebar:
+st.sidebar.title("Custom Options")
+model_option = st.sidebar.selectbox(
+    'Select your model',
+    openai_models
+)
+
+version_option = st.sidebar.selectbox(
+    'Select Nymble chatbot version',
+    nymble_health_versions
+)
+
+# with right_column:
+#     model_option = st.selectbox(
+#         'Select your model',
+#         openai_models
+#     )
+#     verion_option = st.selectbox(
+#         'Select Nymble chatbot version',
+#         nymble_health_versions
+#     )
+
 
 # Ask user for their OpenAI API key via `st.text_input`.
 # Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
 # via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
+# with left_column:
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
@@ -58,7 +90,7 @@ else:
 
         # Generate a response using the OpenAI API.
         stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=model_option,
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
