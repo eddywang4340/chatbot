@@ -7,10 +7,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initializing session states
-if 'evaluate' not in st.session_state:
-    st.session_state['evaluate'] = False
-
 SYSTEM_MESSAGE = """Your name is nymble. You are a compassionate and knowledgeable virtual health companion designed to help patients manage side effects from GLP-1 medications used to treat obesity. Your focus is on providing empathetic, supportive guidance specifically tailored to patients on GLP-1 medications such as semaglutide or liraglutide. You should not provide clinical diagnoses or decisions, and you must always encourage patients to consult with their healthcare provider for any medical concerns. Ensure that your advice is relevant to GLP-1 treatments and weight management, and avoid discussing unrelated medical conditions or treatments.
 Key principles for your responses:
 Empathy and Support: Always maintain a tone that is understanding and encouraging. Acknowledge the patient’s experience, validate their feelings, and provide comforting advice.
@@ -208,15 +204,6 @@ nymble_chatbots = {
     "nymble-general-obesity-SEM"
 }
 
-# Show title and description.
-st.title("💬 Nymble Health's Chatbot")
-sys_message = st.text_area("Give system information here:", SYSTEM_MESSAGE, 170)
-
-# Add a button that evaluates the system message with the test conversations
-if st.button("Evaluate System Prompt"):
-    st.session_state['evaluate'] = True
-    st.write("You clicked this button!")
-
 # Add a selectbox to the sidebar:
 st.sidebar.title("Custom Options")
 chatbot = st.sidebar.selectbox(
@@ -239,6 +226,23 @@ is_product_dev = st.sidebar.selectbox(
     ("Yes", "No")
 )
 
+# Initializing session states
+if 'evaluate' not in st.session_state:
+    st.session_state['evaluate'] = False
+if 'sys_message' not in st.session_state:
+    st.session_state['sys_message'] = SYSTEM_MESSAGE
+if 'model_option' not in st.session_state:
+    st.session_state['model_option'] = model_option
+
+# Show title and description.
+st.title("💬 Nymble Health's Chatbot")
+st.session_state['sys_message'] = st.text_area("Give system information here:", SYSTEM_MESSAGE, 170)
+
+# Add a button that evaluates the system message with the test conversations
+if st.button("Evaluate System Prompt"):
+    st.session_state['evaluate'] = True
+    st.write("You clicked this button!")
+
 # Create an OpenAI client.
 client = OpenAI(api_key=st.secrets["API_KEY"])
 
@@ -246,12 +250,12 @@ client = OpenAI(api_key=st.secrets["API_KEY"])
 # messages persist across reruns.
 if "messages" not in st.session_state:
     # # Need to feed SYSTEM_MESSAGE into the model first before allowing user to type or select their prompt
-    st.session_state.messages = [{"role": "system", "content": sys_message}]
+    st.session_state.messages = [{"role": "system", "content": st.session_state['sys_message']}]
 
 st.markdown("---")
 
 if prompt := st.chat_input("Type a message..."):
-    st.session_state.messages[0] = {"role": "system", "content": sys_message}
+    st.session_state.messages[0] = {"role": "system", "content": st.session_state['sys_message']}
     # Store and display the current prompt.
     st.session_state.messages.append({"role": "user", "content": prompt})
     # messages = [{"role": "system", "content": SYSTEM_MESSAGE}] + st.session_state.messages
@@ -260,7 +264,7 @@ if prompt := st.chat_input("Type a message..."):
 
     # Generate a response using the OpenAI API.
     stream = client.chat.completions.create(
-        model=model_option,
+        model=st.session_state['model_option'],
         # messages = st.session_state.messages,
         messages=st.session_state.messages,
         stream=True,
