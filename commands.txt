@@ -1,0 +1,5 @@
+# Running a Python Virtual Environment
+.venv\Scripts\activate
+
+# Running Streamlit App/Server
+streamlit run Chat_Bot_Interface.py

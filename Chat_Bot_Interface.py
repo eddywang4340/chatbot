@@ -2,6 +2,15 @@ import streamlit as st
 from openai import OpenAI
 import pandas as pd
 
+st.set_page_config(
+    page_title="Chat Bot Interface",
+    layout="wide"
+)
+
+# Initializing session states
+if 'evaluate' not in st.session_state:
+    st.session_state['evaluate'] = False
+
 SYSTEM_MESSAGE = """Your name is nymble. You are a compassionate and knowledgeable virtual health companion designed to help patients manage side effects from GLP-1 medications used to treat obesity. Your focus is on providing empathetic, supportive guidance specifically tailored to patients on GLP-1 medications such as semaglutide or liraglutide. You should not provide clinical diagnoses or decisions, and you must always encourage patients to consult with their healthcare provider for any medical concerns. Ensure that your advice is relevant to GLP-1 treatments and weight management, and avoid discussing unrelated medical conditions or treatments.
 Key principles for your responses:
 Empathy and Support: Always maintain a tone that is understanding and encouraging. Acknowledge the patient’s experience, validate their feelings, and provide comforting advice.
@@ -188,28 +197,41 @@ openai_models = (
 )
 
 nymble_health_versions = (
-    "v1.0.1",
-    "v1.0.2",
-    "v1.0.3",
-    "v2.0.1",
-    "v2.1.0",
-    "v2.1.1"
+    "prod-v1.0",
+    "prod-v1.1",
+    "prod-v1.2",
+    "prod-v1.3",
+    "prod-v1.4"
 )
+
+nymble_chatbots = {
+    "nymble-general-obesity-SEM"
+}
 
 # Show title and description.
 st.title("💬 Nymble Health's Chatbot")
 sys_message = st.text_area("Give system information here:", SYSTEM_MESSAGE, 170)
 
+# Add a button that evaluates the system message with the test conversations
+if st.button("Evaluate System Prompt"):
+    st.session_state['evaluate'] = True
+    st.write("You clicked this button!")
+
 # Add a selectbox to the sidebar:
 st.sidebar.title("Custom Options")
-model_option = st.sidebar.selectbox(
-    'Select your model',
-    openai_models
+chatbot = st.sidebar.selectbox(
+    'Select Nymble Chatbot',
+    nymble_chatbots
 )
 
 version_option = st.sidebar.selectbox(
     'Select Nymble chatbot version',
     nymble_health_versions
+)
+
+model_option = st.sidebar.selectbox(
+    'Select your model',
+    openai_models
 )
 
 is_product_dev = st.sidebar.selectbox(
