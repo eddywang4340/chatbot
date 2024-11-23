@@ -1,6 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 import pandas as pd
+from pages import Evaluated_Conversations
 
 st.set_page_config(
     page_title="Chat Bot Interface",
@@ -242,6 +243,7 @@ st.session_state['sys_message'] = st.text_area("Give system information here:", 
 if st.button("Evaluate System Prompt"):
     st.session_state['evaluate'] = True
     st.write("You clicked this button!")
+    st.switch_page("pages/Evaluated_Conversations.py")
 
 # Create an OpenAI client.
 client = OpenAI(api_key=st.secrets["API_KEY"])
@@ -249,7 +251,7 @@ client = OpenAI(api_key=st.secrets["API_KEY"])
 # Create a session state variable to store the chat messages. This ensures that the
 # messages persist across reruns.
 if "messages" not in st.session_state:
-    # # Need to feed SYSTEM_MESSAGE into the model first before allowing user to type or select their prompt
+    # Need to feed SYSTEM_MESSAGE into the model first before allowing user to type or select their prompt
     st.session_state.messages = [{"role": "system", "content": st.session_state['sys_message']}]
 
 st.markdown("---")
@@ -258,14 +260,12 @@ if prompt := st.chat_input("Type a message..."):
     st.session_state.messages[0] = {"role": "system", "content": st.session_state['sys_message']}
     # Store and display the current prompt.
     st.session_state.messages.append({"role": "user", "content": prompt})
-    # messages = [{"role": "system", "content": SYSTEM_MESSAGE}] + st.session_state.messages
     with st.chat_message("user"):
         st.markdown(prompt)
 
     # Generate a response using the OpenAI API.
     stream = client.chat.completions.create(
         model=st.session_state['model_option'],
-        # messages = st.session_state.messages,
         messages=st.session_state.messages,
         stream=True,
     )
