@@ -8,6 +8,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# Initializing session states
+if 'evaluate' not in st.session_state:
+    st.session_state['evaluate'] = False
+
+url = "https://nymble-general-obesity-sem-prod-ftfehcf8fddabbd2.canadacentral-01.azurewebsites.net/evaluate_response_pair"
+
 nausea_user_prompts = [
     "What do I do about the nausea that I'm having with Wegovy?",
     "1mg, I just increased last week.",
@@ -51,19 +57,27 @@ if st.session_state['evaluate'] is True:
             response = st.write_stream(stream)
             st.markdown("**EXPECTED**: " + expected)
         st.session_state.messages.append({"role": "assistant", "content": response})
-        st.info('This is a purely informational message', icon="ℹ️")
 
-        # # Call API request (get API endpoint name and API key from Shishir) to send over stream and expected
-        # payload = {
-        #     "client": client,
-        #     "expected": expected,
-        #     "actual": response
-        # }
-        # # TODO: Change the API endpoint to what Shishir sent it to be
-        # response = requests.post("http://127.0.0.1:5000/api/analyze", json=payload)
-        # if response.status_code == 200:
-        #     result = response.json()
-        #     st.write("Analysis Result:", result)
+        # Call API request (get API endpoint name and API key from Shishir) to send over stream and expected
+        payload = {
+            "expected": expected,
+            "actual": response
+        }
+        headers = {}
+        # TODO: Change the API endpoint to what Shishir sent it to be
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        # Parsing into dictionary
+        response_dict = response.json() 
+
+        # Accessing specific values
+        factual_consistency = response_dict["factual_analysis"]["factually_consistent"]
+        needs_human_review = response_dict["factual_analysis"]["needs_human_review"]
+        semantic_score = response_dict["semantic_analysis"]["score"]
+        intent_match = response_dict["intent_analysis"]["intents_match"]
+
+
+        st.info(f"Semantic Score: {semantic_score}  \nIntents Match: {intent_match}  \nFactual Consistency: {factual_consistency}  \nNeeds Human Review: {needs_human_review}", icon="ℹ️")
         
         st.markdown("---")
 
